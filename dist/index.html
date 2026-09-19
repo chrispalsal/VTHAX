@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Consent-based network connectivity and location diagnostics.">
+  <meta name="theme-color" content="#071a2b">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23071a2b'/%3E%3Cpath d='M14 38c10-10 26-10 36 0M21 45c6-6 16-6 22 0M29 52c2-2 4-2 6 0' fill='none' stroke='%2336d6b5' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='19' r='7' fill='%23f6bf68'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+  <title>FieldSignal Diagnostics</title>
+</head>
+<body>
+  <main class="shell">
+    <header class="brand" aria-label="FieldSignal Diagnostics">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>FieldSignal</span>
+      <span class="brand-suffix">Diagnostics</span>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow">Participant check-in</div>
+      <h1 id="page-title">Help us understand your connection.</h1>
+      <p>With your permission, this page can periodically record your device location and basic browser-reported network conditions while it stays open.</p>
+    </section>
+
+    <section class="consent-card" id="consent-card" aria-labelledby="consent-title">
+      <div class="card-heading">
+        <div>
+          <span class="step">01 / Permission</span>
+          <h2 id="consent-title">Choose what you share</h2>
+        </div>
+        <div class="privacy-badge">You stay in control</div>
+      </div>
+
+      <div class="choices">
+        <label class="choice">
+          <span class="choice-icon location-icon" aria-hidden="true">⌖</span>
+          <span class="choice-copy">
+            <strong>Device location</strong>
+            <span>Latitude, longitude, accuracy, and the time reported by your device.</span>
+          </span>
+          <input type="checkbox" id="location-consent">
+          <span class="switch" aria-hidden="true"></span>
+        </label>
+
+        <label class="choice">
+          <span class="choice-icon signal-icon" aria-hidden="true">⌁</span>
+          <span class="choice-copy">
+            <strong>Connectivity information</strong>
+            <span>Connection type, estimated speed, round-trip time, and a short reachability check.</span>
+          </span>
+          <input type="checkbox" id="connectivity-consent">
+          <span class="switch" aria-hidden="true"></span>
+        </label>
+      </div>
+
+      <details class="details">
+        <summary>Exactly what is collected</summary>
+        <div class="details-grid">
+          <div><strong>Included</strong><span>Your choices above, a pseudonymous study ID, timestamps, browser connection estimates, and collection errors.</span></div>
+          <div><strong>Not available to this page</strong><span>Wi-Fi name, BSSID, passwords, browsing history, contacts, messages, or precise cellular identifiers.</span></div>
+        </div>
+      </details>
+
+      <div class="study-fields">
+        <label for="participant-id">Study ID <span>optional</span></label>
+        <input id="participant-id" inputmode="text" autocomplete="off" maxlength="128" placeholder="Example: participant-001">
+        <details class="connection-settings">
+          <summary>Collector settings</summary>
+          <label for="collector-url">Secure collector URL</label>
+          <input id="collector-url" inputmode="url" autocomplete="url" placeholder="Same as this website">
+          <label for="access-code">Study access code</label>
+          <input id="access-code" type="password" autocomplete="off" placeholder="Provided by the study team">
+        </details>
+      </div>
+
+      <div class="consent-footer">
+        <p id="consent-note">Nothing is collected until you select at least one option and start.</p>
+        <button class="primary-button" id="start-button" type="button" disabled>
+          Start sharing
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="monitor-card" id="monitor-card" aria-labelledby="monitor-title" hidden>
+      <div class="monitor-topline">
+        <div>
+          <span class="step">02 / Live session</span>
+          <h2 id="monitor-title">Collection is active</h2>
+        </div>
+        <div class="live-pill"><span></span> Live</div>
+      </div>
+
+      <div class="metric-grid">
+        <article>
+          <span class="metric-label">Location</span>
+          <strong id="location-status">Waiting…</strong>
+          <small id="location-detail">Requesting device permission</small>
+        </article>
+        <article>
+          <span class="metric-label">Connection</span>
+          <strong id="connection-status">Reading…</strong>
+          <small id="connection-detail">Checking browser availability</small>
+        </article>
+        <article>
+          <span class="metric-label">Uploads</span>
+          <strong id="upload-count">0</strong>
+          <small id="upload-detail">First sample pending</small>
+        </article>
+      </div>
+
+      <div class="activity" aria-live="polite">
+        <span class="activity-dot" id="activity-dot"></span>
+        <span id="activity-message">Preparing the first sample…</span>
+      </div>
+
+      <div class="monitor-actions">
+        <p>Samples are sent every <strong id="interval-label">60 seconds</strong> while this page is open.</p>
+        <button class="stop-button" id="stop-button" type="button">Stop sharing</button>
+      </div>
+    </section>
+
+    <footer>
+      <span>Collection ends when you stop it or close this page.</span>
+      <span>No advertising or cross-site tracking.</span>
+    </footer>
+  </main>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
