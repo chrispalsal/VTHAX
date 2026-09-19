@@ -159,7 +159,7 @@ def main() -> None:
 
     api_token = os.environ.get("DIAGNOSTICS_API_TOKEN")
     if (
-        args.bind not in {"172.29.82.246", "localhost", "::1"}
+        args.bind not in {"127.0.0.1", "172.29.82.246", "localhost", "::1"}
         and not api_token
     ):
         parser.error(

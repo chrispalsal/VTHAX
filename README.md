@@ -3,6 +3,10 @@
 This project can keep iPerf3 results in a local SQLite database while retaining
 a JSON copy on each test device. It uses only the Python standard library.
 
+It also includes a consent-first web page that can periodically collect browser
+location and connectivity estimates. The page is served by the same collector
+at `http://127.0.0.1:8080/` during local testing.
+
 ## Start the collector
 
 Set a token before exposing the collector to other devices:
@@ -45,3 +49,30 @@ Invoke-RestMethod http://127.0.0.1:8080/results?limit=20 -Headers $headers
 
 `GET /results` returns summaries but deliberately excludes the raw iPerf JSON.
 The raw result remains available in SQLite for later controlled analysis.
+
+## Test the consent web page
+
+Start the collector and open `http://127.0.0.1:8080/` in a browser on the same
+computer. Select location, connectivity, or both, then choose **Start sharing**.
+Samples are stored in the `telemetry_samples` table and can be inspected with:
+
+```powershell
+$headers = @{ Authorization = "Bearer $env:DIAGNOSTICS_API_TOKEN" }
+Invoke-RestMethod http://127.0.0.1:8080/telemetry?limit=20 -Headers $headers
+```
+
+Browser geolocation works only in a secure context: HTTPS or localhost. For
+testing on phones, host the page over HTTPS and expose the collector through an
+HTTPS endpoint. Enter that endpoint under **Collector settings** on the page.
+If the page and collector use different origins, configure the collector with
+the exact page origin before starting it:
+
+```powershell
+$env:DIAGNOSTICS_ALLOWED_ORIGIN = "https://your-page.example"
+python -m backend.server --bind 0.0.0.0 --port 8080
+```
+
+The collector URL must also be HTTPS when the page is HTTPS. Do not place the
+shared access token in the page source or in a URL; provide it to participants
+as the study access code. Collection stops when the user presses **Stop
+sharing**, closes the page, or the browser suspends the page.

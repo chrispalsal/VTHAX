@@ -10,6 +10,7 @@
     uploads: 0,
     sessionId: null,
     collecting: false,
+    controller: null,
   };
 
   const elements = {
@@ -127,11 +128,14 @@
     };
   }
 
-  async function measureReachability() {
+  async function measureReachability(signal) {
     const started = performance.now();
     try {
       const base = elements.collectorUrl.value.trim().replace(/\/$/, "") || window.location.origin;
-      const response = await fetch(`${base}/health?sample=${Date.now()}`, { cache: "no-store" });
+      const response = await fetch(`${base}/health?sample=${Date.now()}`, {
+        cache: "no-store",
+        signal,
+      });
       return {
         reachable: response.ok,
         latency_ms: Math.round(performance.now() - started),
@@ -144,10 +148,20 @@
   async function collectAndUpload() {
     if (!state.active || state.collecting) return;
     state.collecting = true;
+    const controller = new AbortController();
+    state.controller = controller;
     setActivity("Collecting a sample…");
     if (elements.locationConsent.checked) await requestLocation();
+    if (!state.active) {
+      state.collecting = false;
+      return;
+    }
     const connectivity = elements.connectivityConsent.checked ? readConnection() : null;
-    if (connectivity) connectivity.collector_check = await measureReachability();
+    if (connectivity) connectivity.collector_check = await measureReachability(controller.signal);
+    if (!state.active) {
+      state.collecting = false;
+      return;
+    }
 
     const payload = {
       session_id: state.sessionId,
@@ -170,6 +184,7 @@
         method: "POST",
         headers,
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
       if (!response.ok) throw new Error(`Collector returned ${response.status}`);
       state.uploads += 1;
@@ -177,10 +192,13 @@
       elements.uploadDetail.textContent = `Last sent ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
       setActivity("Sample received by the collector.", "success");
     } catch (error) {
-      setActivity(`Could not send this sample: ${error.message}`, "error");
-      elements.uploadDetail.textContent = "Will try again at the next interval";
+      if (state.active) {
+        setActivity(`Could not send this sample: ${error.message}`, "error");
+        elements.uploadDetail.textContent = "Will try again at the next interval";
+      }
     } finally {
       state.collecting = false;
+      if (state.controller === controller) state.controller = null;
     }
   }
 
@@ -201,6 +219,7 @@
 
   function stopCollection() {
     state.active = false;
+    if (state.controller) state.controller.abort();
     window.clearInterval(state.timer);
     state.timer = null;
     state.latestPosition = null;
@@ -212,10 +231,42 @@
     elements.startButton.focus();
   }
 
+  function registerCollectionStatusTool() {
+    const context = document.modelContext;
+    if (!context?.registerTool) return;
+    try {
+      void Promise.resolve(context.registerTool({
+        name: "read_collection_status",
+        title: "Read collection status",
+        description: "Read whether this page is collecting diagnostic data and which permissions the participant selected. This tool cannot grant consent or start collection.",
+        inputSchema: {
+          type: "object",
+          properties: {},
+          additionalProperties: false,
+        },
+        annotations: { readOnlyHint: true, untrustedContentHint: false },
+        execute() {
+          return {
+            active: state.active,
+            selected_permissions: {
+              location: elements.locationConsent.checked,
+              connectivity: elements.connectivityConsent.checked,
+            },
+            uploaded_samples: state.uploads,
+            status_message: elements.activityMessage.textContent,
+          };
+        },
+      })).catch(() => {});
+    } catch {
+      // WebMCP is optional and unsupported browsers use the visible controls.
+    }
+  }
+
   elements.locationConsent.addEventListener("change", updateStartState);
   elements.connectivityConsent.addEventListener("change", updateStartState);
   elements.startButton.addEventListener("click", startCollection);
   elements.stopButton.addEventListener("click", stopCollection);
   window.addEventListener("online", () => state.active && readConnection());
   window.addEventListener("offline", () => state.active && readConnection());
+  registerCollectionStatusTool();
 })();
