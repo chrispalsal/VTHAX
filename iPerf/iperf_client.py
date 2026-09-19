@@ -108,7 +108,7 @@ def main():
     parser.add_argument("--output", default="iperf_result.json")
     parser.add_argument(
         "--collector-url",
-        help="Collector base URL, for example http://192.168.1.10:8080"
+        help="Collector base URL, for example http://100.64.6.163:5201"
     )
     parser.add_argument(
         "--token",
