@@ -1,0 +1,5 @@
+# Goodwin Hall Floor 2 - WiFi collection route
+goodwin_f2_aero
+goodwin_f2_class
+goodwin_f2_hall
+goodwin_f2_aero

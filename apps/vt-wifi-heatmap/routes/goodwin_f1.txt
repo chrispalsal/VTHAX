@@ -1,0 +1,7 @@
+# Goodwin Hall Floor 1 - WiFi collection route
+# Walk in order, press Enter at each checkpoint
+goodwin_f1_lobby
+goodwin_f1_lab1
+goodwin_f1_hall
+goodwin_f1_lab2
+goodwin_f1_lobby

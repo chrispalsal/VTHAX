@@ -1,0 +1,5 @@
+# Goodwin Hall Floor 3 - WiFi collection route
+goodwin_f3_office
+goodwin_f3_conf
+goodwin_f3_stairs
+goodwin_f3_office

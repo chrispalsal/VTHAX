@@ -1,0 +1,4 @@
+# Goodwin Hall Floor 4 - WiFi collection route
+goodwin_f4_study
+goodwin_f4_corner
+goodwin_f4_study
